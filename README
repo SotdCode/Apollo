@@ -1,0 +1,2 @@
+A scanner written in python, can dork for SQLI, LFI,XSS,RFI vulns and perform other scans.
+Usage: python Apollo.py 
