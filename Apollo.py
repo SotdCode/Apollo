@@ -48,7 +48,6 @@ class Router(threading.Thread):
         self.queue = queue 
         self.user = user
         self.passw = passw
-        self.routers = []
  
     def run(self):
         """Tries to connect to given Ip on port 22"""
@@ -63,37 +62,12 @@ class Router(threading.Thread):
             try:
                 ssh.connect(ip_add, username = self.user, password = self.passw, timeout = 10)
                 ssh.close()
-            except:
-                print 'Not Working: %s:22 - %s:%s\n' % (ip_add, self.user, self.passw)
-            else:
                 print "Working: %s:22 - %s:%s\n" % (ip_add, self.user, self.passw)
                 write = open('Routers.txt', "a+")
                 write.write('%s:22 %s:%s\n' % (ip_add, self.user, self.passw))
                 write.close()  
-                self.routers.append(ip_add)
-            finally:
-                self.queue.task_done()
-            if len(self.routers) > 0:
-                self.command()
-
-    def command():
-        """Allows user to run commands on chosen router"""
-        num = 0
-        for addr in self.routers:
-            print "[%s] %s " % (num, addr)
-        again = 'y'
-        while again == 'y':
-            choose = raw_input('Press number to attempt command execution(q to quit):')
-            if choose != 'q':
-                chosen = self.routers[int(choose)]
-                print 'Connecting to %s' % (chosen)
-                try:
-                    ssh.connect(chosen, username = self.user, password = self.passw, timeout = 10)
-                except:
-                    print 'Problem connecting'
-                else:
-                    """paramiko send command when figured out"""
-
+            except:
+                print 'Not Working: %s:22 - %s:%s\n' % (ip_add, self.user, self.passw)
                 
             
 class Ip:
