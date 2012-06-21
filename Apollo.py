@@ -249,7 +249,6 @@ class ScanClass(threading.Thread):
                         self.mysql(test)
                         vuln += 1
                     elif (re.findall('JET Database Engine', data, re.I)):
-                        print 'aaaa'
                         self.mssql(test)
                         vuln += 1
                     elif (re.findall('Microsoft OLE DB Provider for', data, re.I)):
