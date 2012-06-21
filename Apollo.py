@@ -219,7 +219,7 @@ class ScanClass(threading.Thread):
         threading.Thread.__init__(self)
         self.queue = queue
         self.schar = "'"
-        self.file = 'Sqli.txt'
+        self.file = 'MySql.txt'
  
     def run(self):
         """Scans Url for Sql errors"""
@@ -282,7 +282,7 @@ class ScanClass(threading.Thread):
             print 'Dupe: ' + url
         else:
             print "MsSql: " + url
-            write = open(self.file, "a+")
+            write = open('MsSql.txt', "a+")
             write.write(url + "\n")
             write.close()   
 
