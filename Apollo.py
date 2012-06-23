@@ -602,6 +602,7 @@ class Cracker(threading.Thread):
         """Print result if found"""
         print self.hashm + ' = ' + words
 
+
 def word():
     """Create queue and threads for hash crack"""
     queue = Queue.Queue()
@@ -617,7 +618,6 @@ def word():
         thread.setDaemon(True)
         thread.start()
     queue.join()
-    print 'aaaaa'
 
 
 class OnlineCrack:
@@ -648,16 +648,16 @@ class Check:
             conn.add_header('User-Agent', choice(USER_AGENT))
             opener = urllib2.build_opener()
             opener.open(conn)
-            data = opener.open(conn).read()  
+            data = opener.open(conn).read() 
+        except urllib2.HTTPError:
+            print 'Error connecting'
+        else:
             start = 0
             end = len(data)     
             start = data.find('onClick="', start, end)
             end = data.find('size=', start, end)   
             ip_add = data[start+46:end-2].strip()
             print '\nYour current Ip address is %s' % (ip_add)
-        
-        except urllib2.HTTPError:
-            print 'Error connecting'
     
 
 def output():
