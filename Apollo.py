@@ -462,7 +462,6 @@ class Atest(threading.Thread):
         while True:
             try:
                 site = self.queue.get(False)
-
             except Queue.Empty:
                 break
             try:
@@ -470,11 +469,12 @@ class Atest(threading.Thread):
                 conn.add_header('User-Agent', choice(USER_AGENT))
                 opener = urllib2.build_opener()
                 opener.open(conn)
+            except urllib2.URLError:
+                pass
+            else:
                 print site
                 found.append(site)
-                self.queue.task_done()
-   
-            except urllib2.URLError:
+            finally:
                 self.queue.task_done()
 
 
