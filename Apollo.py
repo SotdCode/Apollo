@@ -543,10 +543,11 @@ class SDtest(threading.Thread):
                 opener = urllib2.build_opener()
                 opener.open(conn)
             except urllib2.URLError:
-                self.queue.task_done()
+                pass
             else:
                 target = socket.gethostbyname(domain)  
                 print 'Found: ' + site + ' - ' + target
+            finally:
                 self.queue.task_done()        
  
 
