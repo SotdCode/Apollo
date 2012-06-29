@@ -40,10 +40,6 @@ found = []
 class Router(threading.Thread):
     """Checks for routers running ssh with given User/Pass"""
     def __init__(self, queue, user, passw):
-        if not PARAMIKO_IMPORTED:
-            print 'You need paramiko.'
-            print 'http://www.lag.net/paramiko/'
-            sys.exit(1)
         threading.Thread.__init__(self)     
         self.queue = queue 
         self.user = user
@@ -78,6 +74,10 @@ class Router(threading.Thread):
 class Ip:
     """Handles the Ip range creation"""
     def __init__(self):
+        if not PARAMIKO_IMPORTED:
+            print 'You need paramiko.'
+            print 'http://www.lag.net/paramiko/'
+            sys.exit(1)
         self.ip_range = []
         self.start_ip = raw_input('Start ip: ')
         self.end_ip = raw_input('End ip: ')
@@ -143,7 +143,7 @@ class Ip:
                                     stdin, stdout, stderr = ssh.exec_command(execute)
                                     print stdout.read()
                                 except:
-                                    print 'Whoops'
+                                    print 'Error executing'
 
                     again = raw_input('Go again(y or n)')
                 else:
