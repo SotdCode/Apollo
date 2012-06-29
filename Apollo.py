@@ -239,7 +239,7 @@ class ScanClass(threading.Thread):
                     conn.add_header('User-Agent', choice(USER_AGENT))
                     opener = urllib2.build_opener()
                     data = opener.open(conn).read()
-                except:
+                except urllib2.URLError:
                     self.queue.task_done()
                 else:
                     if (re.findall("You have an error in your SQL syntax", data, re.I)):
@@ -316,7 +316,7 @@ class LScanClass(threading.Thread):
                     opener = urllib2.build_opener()
                     data = opener.open(conn).read()
 
-                except:
+                except urllib2.URLError:
                     self.queue.task_done()
 
                 else:
@@ -372,7 +372,7 @@ class XScanClass(threading.Thread):
                     conn.add_header('User-Agent', choice(USER_AGENT))
                     opener = urllib2.build_opener()
                     data = opener.open(conn).read()
-                except:
+                except urllib2.URLError:
                     self.queue.task_done()
                 else:
                     if (re.findall("<script>alert('xss')</script>", data, re.I)):
@@ -425,7 +425,7 @@ class RScanClass(threading.Thread):
                     conn.add_header('User-Agent', choice(USER_AGENT))
                     opener = urllib2.build_opener()
                     data = opener.open(conn).read()
-                except:
+                except urllib2.URLError:
                     self.queue.task_done()
                 else:
                     if (re.findall("""<meta content="Search the world's information, including webpages, images, videos and more.""", data, re.I)): 
